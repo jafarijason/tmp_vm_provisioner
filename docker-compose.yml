@@ -1,0 +1,11 @@
+services:
+  ubuntu-ssh:
+    image: rastasheep/ubuntu-sshd:18.04
+    container_name: ssh-container
+    ports:
+      - "2222:22"
+    volumes:
+      - ./.~ssh:/root/.ssh
+    command: bash -c "  service ssh restart && tail -f /dev/null"
+    stdin_open: true
+    tty: true
