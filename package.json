@@ -1,17 +1,17 @@
 {
   "name": "tmp_vm_provisioner",
   "description": "A wrapper for redis client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Jason Jafari",
   "bin": {},
-  "bugs": "https://github.com/jafarijason/vm_provisioner/issues",
+  "bugs": "https://github.com/jafarijason/tmp_vm_provisioner/issues",
   "engines": {
     "node": ">=18.0.0"
   },
-  "homepage": "https://github.com/jafarijason/vm_provisioner",
+  "homepage": "https://github.com/jafarijason/tmp_vm_provisioner",
   "license": "MIT",
   "main": "dist/index.mjs",
-  "repository": "https://github.com/jafarijason/vm_provisioner",
+  "repository": "https://github.com/jafarijason/tmp_vm_provisioner",
   "scripts": {
     "build": "rm -rf ./dist ; esbuild ./src/index.ts   --outfile=dist/index.mjs --platform=node --target=node14 --format=esm && tsc --emitDeclarationOnly --declarationDir dist",
     "serve:coverage": "http-server coverage -p 7777",
