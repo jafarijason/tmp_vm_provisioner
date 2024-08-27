@@ -146,11 +146,5 @@ export class ServerProvisioner {
             throw err
         }
     }
-
-    // async readJsonFile(remotePath) {
-    //     const runCommand: any = await this.runCommandOverSSH(`cat ${remotePath}`)
-    //     const result = runCommand?.stdout
-    //     return result
-    // }
 }
 
