@@ -167,6 +167,22 @@ describe('ServerProvisioner', () => {
                 expect(err.message).toBe('connect: Cannot parse privateKey: Unsupported key format')
             }
         });
+        test('check error readFile', async () => {
+            const vm1 = new ServerProvisioner({
+                host: "127.0.0.1",
+                sshPort: 2222,
+                userName: 'root',
+                privateKey: 'asd',
+            })
+
+            try {
+                await vm1.readFile(
+                    '/root/vm_folder/test1.txt',
+                )
+            } catch (err) {
+                expect(err.message).toBe('Cannot parse privateKey: Unsupported key format')
+            }
+        });
 
         test('copy simple file', async () => {
             const vm1 = new ServerProvisioner({
@@ -201,6 +217,22 @@ describe('ServerProvisioner', () => {
             const transferredFileToLocal = await fs.readFile(`${__dirname}/.~localfoler/test1.txt`, "utf8")
             expect(originalContent).toBe(transferredFileToLocal)
 
+            const readValue = await vm1.readFile('/root/vm_folder/test1.txt')
+            expect(readValue).toBe(uuid)
+
+            const someText = "aa\nbb\ncc"
+
+            await vm1.write(
+                `/root/vm_folder/test2.txt`,
+                someText
+            )
+            const readValue2 = await vm1.readFile('/root/vm_folder/test2.txt')
+            expect(someText).toBe(readValue2)
+            await vm1.write(
+                `/root/vm_folder/test3.txt`,
+            )
+            const readValue3 = await vm1.readFile('/root/vm_folder/test3.txt')
+            expect(readValue3).toBe("")
             await vm1.deleteFileFromRemote(
                 '/root/vm_folder/test1.txt',
             )
@@ -208,6 +240,7 @@ describe('ServerProvisioner', () => {
             await fs.remove(originalFilePath)
             await fs.remove(`${__dirname}/.~localfoler/test1.txt`)
         });
+
     })
 
 

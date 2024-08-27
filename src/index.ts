@@ -1,6 +1,8 @@
 
 import { Client } from 'ssh2'
 import SftpClient from 'ssh2-sftp-client'
+import { v4 as uuidv4 } from "uuid"
+import fs from 'fs-extra';
 
 export class ServerProvisioner {
     host
@@ -29,6 +31,22 @@ export class ServerProvisioner {
         this.readyTimeout = readyTimeout
     }
 
+    async sftPConnect(sftp) {
+        try {
+            await sftp.connect({
+                host: this.host,
+                port: this.sshPort,
+                username: this.userName,
+                privateKey: this.privateKey,
+                passphrase: this.privateKeyPassPhrase,
+                readyTimeout: this.readyTimeout,
+            });
+        }
+        catch (err) {
+            console.error('sftPConnect', err.message)
+            throw err
+        }
+    }
 
     async runCommandOverSSH(command) {
         return new Promise((resolve, reject) => {
@@ -64,14 +82,7 @@ export class ServerProvisioner {
     async transferFileToRemote(localPath, remotePath) {
         const sftp = new SftpClient();
         try {
-            await sftp.connect({
-                host: this.host,
-                port: this.sshPort,
-                username: this.userName,
-                privateKey: this.privateKey,
-                passphrase: this.privateKeyPassPhrase,
-                readyTimeout: this.readyTimeout,
-            });
+            await this.sftPConnect(sftp)
             await sftp.put(localPath, remotePath);
         } catch (err) {
             console.error('Error:', err);
@@ -84,14 +95,7 @@ export class ServerProvisioner {
     async transferFileToLocal(remotePath, localPath) {
         const sftp = new SftpClient();
         try {
-            await sftp.connect({
-                host: this.host,
-                port: this.sshPort,
-                username: this.userName,
-                privateKey: this.privateKey,
-                passphrase: this.privateKeyPassPhrase,
-                readyTimeout: this.readyTimeout,
-            });
+            await this.sftPConnect(sftp)
             await sftp.fastGet(remotePath, localPath);
         } catch (err) {
             console.error('Error:', err);
@@ -104,14 +108,7 @@ export class ServerProvisioner {
     async deleteFileFromRemote(remotePath) {
         const sftp = new SftpClient();
         try {
-            await sftp.connect({
-                host: this.host,
-                port: this.sshPort,
-                username: this.userName,
-                privateKey: this.privateKey,
-                passphrase: this.privateKeyPassPhrase,
-                readyTimeout: this.readyTimeout,
-            });
+            await this.sftPConnect(sftp)
             await sftp.delete(remotePath);
         } catch (err) {
             console.error('Error:', err);
@@ -119,6 +116,20 @@ export class ServerProvisioner {
         } finally {
             await sftp.end();
         }
+    }
+
+    async readFile(remotePath) {
+        const runCommand: any = await this.runCommandOverSSH(`cat ${remotePath}`)
+        const result = runCommand?.stdout
+        return result
+    }
+
+    async write(remotePath, content= "") {
+        const uuid = uuidv4()
+        const filePath = `/tmp/${uuid}`
+        await fs.writeFile(filePath, content, "utf8")
+
+        await this.transferFileToRemote(filePath, remotePath)
     }
 }
 
