@@ -6,6 +6,7 @@ services:
       - "2222:22"
     volumes:
       - ./.~ssh:/root/.ssh
+      - ./.~vmfolder:/root/vm_folder
     command: bash -c "  service ssh restart && tail -f /dev/null"
     stdin_open: true
     tty: true

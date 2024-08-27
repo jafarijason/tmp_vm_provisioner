@@ -1,6 +1,7 @@
 
 import { NodeSSH } from 'node-ssh'
 import { Client } from 'ssh2'
+import SftpClient from 'ssh2-sftp-client'
 
 export class ServerProvisioner {
     host
@@ -35,6 +36,7 @@ export class ServerProvisioner {
             const conn = new Client();
             conn.on('ready', () => {
                 conn.exec(command, (err, stream) => {
+                    /* istanbul ignore if */
                     if (err) return reject(err);
 
                     let stdout = '';
@@ -60,26 +62,64 @@ export class ServerProvisioner {
         });
     }
 
+    async transferFileToRemote(localPath, remotePath) {
+        const sftp = new SftpClient();
+        try {
+            await sftp.connect({
+                host: this.host,
+                port: this.sshPort,
+                username: this.userName,
+                privateKey: this.privateKey,
+                passphrase: this.privateKeyPassPhrase,
+                readyTimeout: this.readyTimeout,
+            });
+            await sftp.put(localPath, remotePath);
+        } catch (err) {
+            console.error('Error:', err);
+            throw err
+        } finally {
+            await sftp.end();
+        }
+    }
 
-    // async ensureConnect () {
-    //     await this.sshDriver.connect({
+    async transferFileToLocal(remotePath, localPath) {
+        const sftp = new SftpClient();
+        try {
+            await sftp.connect({
+                host: this.host,
+                port: this.sshPort,
+                username: this.userName,
+                privateKey: this.privateKey,
+                passphrase: this.privateKeyPassPhrase,
+                readyTimeout: this.readyTimeout,
+            });
+            await sftp.fastGet(remotePath, localPath);
+        } catch (err) {
+            console.error('Error:', err);
+            throw err
+        } finally {
+            await sftp.end();
+        }
+    }
 
-    //     })
-    // }
-
+    async deleteFileFromRemote(remotePath) {
+        const sftp = new SftpClient();
+        try {
+            await sftp.connect({
+                host: this.host,
+                port: this.sshPort,
+                username: this.userName,
+                privateKey: this.privateKey,
+                passphrase: this.privateKeyPassPhrase,
+                readyTimeout: this.readyTimeout,
+            });
+            await sftp.delete(remotePath);
+        } catch (err) {
+            console.error('Error:', err);
+            throw err
+        } finally {
+            await sftp.end();
+        }
+    }
 }
 
-// const SFTPClient = require('ssh2-sftp-client');
-// Function to transfer files using SCP (SFTP)
-// async function transferFileOverSCP(config, localPath, remotePath) {
-//     const sftp = new SFTPClient();
-//     try {
-//         await sftp.connect(config);
-//         await sftp.put(localPath, remotePath);
-//         console.log('File transferred successfully!');
-//     } catch (err) {
-//         console.error('Error:', err);
-//     } finally {
-//         await sftp.end();
-//     }
-// }
