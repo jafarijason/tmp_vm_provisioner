@@ -124,12 +124,33 @@ export class ServerProvisioner {
         return result
     }
 
-    async write(remotePath, content= "") {
+    async write(remotePath, content = "") {
         const uuid = uuidv4()
         const filePath = `/tmp/${uuid}`
         await fs.writeFile(filePath, content, "utf8")
 
         await this.transferFileToRemote(filePath, remotePath)
+        await fs.remove(filePath)
     }
+
+    async writeJsonFile(remotePath, contentObj = {}) {
+        await this.write(remotePath, JSON.stringify(contentObj))
+    }
+    async readJsonFile(remotePath) {
+        const res = await this.readFile(remotePath)
+        try {
+            const result = JSON.parse(res)
+            return result
+        } catch (err) {
+            console.error('readJsonFile', err.message)
+            throw err
+        }
+    }
+
+    // async readJsonFile(remotePath) {
+    //     const runCommand: any = await this.runCommandOverSSH(`cat ${remotePath}`)
+    //     const result = runCommand?.stdout
+    //     return result
+    // }
 }
 

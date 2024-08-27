@@ -228,14 +228,61 @@ describe('ServerProvisioner', () => {
             )
             const readValue2 = await vm1.readFile('/root/vm_folder/test2.txt')
             expect(someText).toBe(readValue2)
+
+            try {
+                const readJson = await vm1.readJsonFile('/root/vm_folder/test2.txt')
+            } catch (err) {
+                expect(err.message.startsWith("Unexpected token 'a'")).toBe(true)
+            }
+
+
+
+
             await vm1.write(
                 `/root/vm_folder/test3.txt`,
             )
             const readValue3 = await vm1.readFile('/root/vm_folder/test3.txt')
             expect(readValue3).toBe("")
+
+
+
+
+
+
+            await vm1.writeJsonFile(
+                `/root/vm_folder/test4.json`,
+            )
+
+            const readJson4 = await vm1.readJsonFile('/root/vm_folder/test4.json')
+            expect(JSON.stringify(readJson4)).toBe("{}")
+
+            const test5Obj = {
+                TEST5: "TEST5Value"
+            }
+            await vm1.writeJsonFile(
+                `/root/vm_folder/test5.json`,
+                test5Obj
+            )
+
+            const readJson5 = await vm1.readJsonFile('/root/vm_folder/test5.json')
+            expect(JSON.stringify(readJson5)).toBe(JSON.stringify(test5Obj))
+
             await vm1.deleteFileFromRemote(
                 '/root/vm_folder/test1.txt',
             )
+            await vm1.deleteFileFromRemote(
+                '/root/vm_folder/test2.txt',
+            )
+            await vm1.deleteFileFromRemote(
+                '/root/vm_folder/test3.txt',
+            )
+            await vm1.deleteFileFromRemote(
+                '/root/vm_folder/test4.json',
+            )
+            await vm1.deleteFileFromRemote(
+                '/root/vm_folder/test5.json',
+            )
+
 
             await fs.remove(originalFilePath)
             await fs.remove(`${__dirname}/.~localfoler/test1.txt`)
