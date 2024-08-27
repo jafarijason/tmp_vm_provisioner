@@ -1,5 +1,4 @@
 
-import { NodeSSH } from 'node-ssh'
 import { Client } from 'ssh2'
 import SftpClient from 'ssh2-sftp-client'
 

@@ -3,8 +3,6 @@ import {
 } from './src/index';
 import fs from 'fs-extra';
 
-import { NodeSSH } from 'node-ssh'
-import { Client } from 'ssh2'
 import { v4 as uuidv4 } from "uuid"
 
 
